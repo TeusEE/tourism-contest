@@ -1,0 +1,1 @@
+{"response":{"header":{"resultCode":"0000","resultMsg":"OK"},"body":{"items":{"item":[{"contentid":"sample-event-1001","title":"샘플 지역 행사","addr1":"샘플시 샘플구 행사로 1","addr2":"행사관","mapx":"126.9780","mapy":"37.5665","homepage":"https://example.com/event"}]},"numOfRows":1,"pageNo":1,"totalCount":1}}}

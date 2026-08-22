@@ -1,0 +1,30 @@
+{
+  "lastBuildDate": "Thu, 20 Aug 2026 12:00:00 +0900",
+  "total": 2,
+  "start": 1,
+  "display": 2,
+  "items": [
+    {
+      "title": "<b>서울역</b>",
+      "link": "https://example.com/seoul-station",
+      "category": "교통시설>기차역",
+      "description": "",
+      "telephone": "",
+      "address": "서울특별시 중구 봉래동2가 122-11",
+      "roadAddress": "서울특별시 중구 한강대로 405",
+      "mapx": "126.970606",
+      "mapy": "37.554678"
+    },
+    {
+      "title": "서울역 광장",
+      "link": "https://example.com/seoul-station-plaza",
+      "category": "관광명소>광장",
+      "description": "",
+      "telephone": "",
+      "address": "서울특별시 중구 남대문로5가 581",
+      "roadAddress": "서울특별시 중구 세종대로 2",
+      "mapx": "126.972100",
+      "mapy": "37.555100"
+    }
+  ]
+}

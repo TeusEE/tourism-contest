@@ -1,0 +1,1 @@
+{"code":0,"message":"Route finding succeeded.","currentDateTime":"2026-08-12T12:00:00","route":{"traoptimal":[{"summary":{"start":{"location":[126.9780,37.5665]},"goal":{"location":[129.0756,35.1796]},"distance":400000,"duration":18000000,"bbox":[[126.9,35.1],[129.1,37.6]]},"path":[[126.9780,37.5665],[128.0,36.5],[129.0756,35.1796]],"section":[],"guide":[]}]}}

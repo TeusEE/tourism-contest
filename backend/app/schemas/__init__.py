@@ -1,0 +1,46 @@
+"""Shared request and response schemas."""
+
+from app.schemas.locations import LocationSuggestion, LocationSuggestionResponse
+from app.schemas.travel_plan import (
+    ClientPlatform,
+    CongestionLevel,
+    Coordinate,
+    EventConfidence,
+    EventStatus,
+    EventType,
+    LocationInput,
+    RouteSummary,
+    SourceType,
+    TravelPlanAnalysisResponse,
+    TravelPlanRequest,
+    VisitorStatus,
+    Warning,
+    WarningScope,
+    WarningSeverity,
+    WeatherCondition,
+    WeatherForecast,
+    WeatherStatus,
+)
+
+__all__ = [
+    "ClientPlatform",
+    "CongestionLevel",
+    "Coordinate",
+    "EventConfidence",
+    "EventStatus",
+    "EventType",
+    "LocationInput",
+    "LocationSuggestion",
+    "LocationSuggestionResponse",
+    "RouteSummary",
+    "SourceType",
+    "TravelPlanAnalysisResponse",
+    "TravelPlanRequest",
+    "VisitorStatus",
+    "Warning",
+    "WarningScope",
+    "WarningSeverity",
+    "WeatherCondition",
+    "WeatherForecast",
+    "WeatherStatus",
+]

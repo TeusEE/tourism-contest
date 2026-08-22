@@ -1,0 +1,38 @@
+# Environment and secrets
+.env
+.env.*
+!**/.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+
+# JavaScript
+node_modules/
+*.tsbuildinfo
+
+# Expo
+.expo/
+web-build/
+mobile/ios/
+mobile/android/
+mobile/dist/
+
+# Test and coverage output
+coverage/
+.coverage
+
+# Editors and OS files
+.DS_Store
+/temp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
