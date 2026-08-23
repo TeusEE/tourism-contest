@@ -8,7 +8,7 @@ const isDevelopmentClient =
 const config: ExpoConfig = {
   name: 'Travel Congestion',
   slug: 'travel-congestion',
-  version: '1.0.0',
+  version: '1.0.1',
   orientation: 'portrait',
   icon: './assets/images/icon-ios-v2.png',
   scheme: 'travelcongestion',
