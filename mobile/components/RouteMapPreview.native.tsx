@@ -38,14 +38,14 @@ export function RouteMapPreview({ route, events, onSelectEvent }: RouteMapPrevie
       <NaverMapView
         accessibilityLabel="경로와 행사 위치 네이버 지도"
         initialRegion={mapRegion}
-        // This map is a read-only preview inside the results ScrollView.
-        // Leaving pan gestures enabled makes the native map consume the
-        // vertical swipe, so the cards below the map cannot be reached.
-        isScrollGesturesEnabled={false}
+        // The map is interactive. Swipes that start inside the map are
+        // intentionally consumed by Naver so the user can pan the map;
+        // the surrounding results ScrollView remains available outside it.
+        isScrollGesturesEnabled={true}
         isZoomGesturesEnabled={false}
         isTiltGesturesEnabled={false}
         isRotateGesturesEnabled={false}
-        pointerEvents="none"
+        pointerEvents="auto"
         isShowCompass={false}
         isShowScaleBar={false}
         isShowZoomControls={false}
@@ -92,7 +92,7 @@ export function RouteMapPreview({ route, events, onSelectEvent }: RouteMapPrevie
       </NaverMapView>
       <View pointerEvents="none" style={styles.mapHeader}>
         <Text style={styles.mapTitle}>경로 지도</Text>
-        <Text style={styles.mapHint}>NAVER 지도 SDK</Text>
+        <Text style={styles.mapHint}>NAVER 지도 · 드래그하여 탐색</Text>
       </View>
       <View pointerEvents="none" style={styles.legend}>
         <View style={styles.legendItem}>

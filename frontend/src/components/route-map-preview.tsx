@@ -87,7 +87,7 @@ export function RouteMapPreview({ route, events }: RouteMapPreviewProps) {
       <p className="map-note">
         {useCoordinateFallback
           ? `${fallbackReason} 좌표를 화면에 맞춰 투영한 참고용 경로입니다. 실제 교통량을 표시하지 않습니다.`
-          : "Naver 지도에 Cloud Run이 반환한 자동차 경로와 좌표가 있는 행사 위치를 표시합니다. 지도는 읽기 전용 미리보기입니다."}
+          : "Naver 지도에 Cloud Run이 반환한 자동차 경로와 좌표가 있는 행사 위치를 표시합니다. 지도를 드래그해 주변을 확인할 수 있습니다."}
       </p>
     </section>
   );

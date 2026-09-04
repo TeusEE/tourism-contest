@@ -254,7 +254,7 @@ BFF는 Cloud Run의 상태 코드와 안전한 JSON 오류 구조를 유지해 �
 - `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=...`를 결과 화면에서 비동기 로드한다.
 - origin, destination, polyline과 좌표가 있는 행사 위치를 `LatLngBounds`로 묶어 `fitBounds`한다.
 - 출발·도착은 라벨이 있는 마커, 경로는 Naver `Polyline`, 행사는 혼잡 신호 색상의 번호 마커로 표시한다.
-- 모바일 구현과 동일하게 지도는 읽기 전용 미리보기로 두어 스크롤을 방해하지 않으며, Naver 로고·지도 데이터 저작권 표시는 숨기지 않는다.
+- 모바일 구현과 동일하게 지도는 드래그 이동이 가능한 참고용 미리보기로 제공하며, 지도 밖에서는 결과 화면을 스크롤할 수 있다. Naver 로고·지도 데이터 저작권 표시는 숨기지 않는다.
 - 웹용 client ID가 없거나 등록된 웹 서비스 URL과 일치하지 않으면 빈 화면 대신 기존 좌표 SVG 미리보기로 전환한다.
 - Naver Maps Web Dynamic Map을 사용하려면 Naver Cloud Platform Application에서 Web Dynamic Map을 선택하고 `travel-congestion.vercel.app`을 웹 서비스 URL로 등록해야 한다.
 

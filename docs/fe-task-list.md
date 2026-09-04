@@ -350,7 +350,7 @@
 - 실제 서울역→부산역 Cloud Run 응답을 `https://travel-congestion.vercel.app`에서 Naver 타일·경로·출발·도착 마커로 렌더링하는 것을 Playwright MCP로 확인했다.
 - 실제 응답의 이벤트 좌표가 있을 때 번호 마커를 추가하고, 마우스·키보드 선택 시 결과 이벤트 카드가 선택되는지 확인했다.
 - Naver client ID가 없거나 `localhost`처럼 허용 웹 서비스 URL이 아닌 환경에서는 인증 실패를 감지해 좌표 SVG fallback으로 전환한다.
-- 모바일 브라우저 폭에서도 읽기 전용 지도를 유지하고, Naver 로고·지도 데이터 저작권 표시는 숨기지 않는다.
+- 모바일 브라우저 폭에서도 드래그 이동 가능한 지도를 제공하고, Naver 로고·지도 데이터 저작권 표시는 숨기지 않는다.
 - 기존 SVG fallback은 polyline 4,497개 점과 출발·도착 HTML 마커가 카드 전체 기준에 맞도록 `preserveAspectRatio="none"`을 유지한다.
 
 ### FE-043 행사 count-only·경고·부분 성공 UI
