@@ -254,7 +254,8 @@
 - 우선순위: `P0`
 - 의존성: FE-021, FE-030
 - 작업:
-  - 300ms debounce, 2~80자, 숫자 포함 주소 추천 생략
+- 300ms debounce, 2~80자 장소명·숫자 포함 도로명 주소 추천
+- Enter 입력 시 후보 즉시 조회, 후보 노출 중 폼 자동 제출 방지
   - 최대 5개 후보 listbox/option 표시
   - 후보 선택 시 도로명 주소 → 지번 주소 → 장소명 순으로 입력값 정규화
   - loading, 빈 결과, 추천 실패, 취소 상태 표시
@@ -265,8 +266,8 @@
 
 현재 점검:
 
-- 300ms debounce, 2~80자, 숫자 포함 주소 추천 생략, 최대 5개 listbox/option, 도로명→지번→장소명 정규화를 구현했다.
-- ArrowUp/Down·Enter·Escape와 `aria-activedescendant`로 키보드 후보 선택을 지원한다.
+- 300ms debounce, 2~80자 장소명·도로명 주소 추천, 최대 5개 listbox/option, 도로명→지번→장소명 정규화를 구현했다.
+- Enter로 후보를 즉시 조회하고 후보가 노출된 상태에서 폼이 먼저 제출되지 않도록 했으며, ArrowUp/Down·Enter·Escape와 `aria-activedescendant`로 키보드 후보 선택을 지원한다.
 - AbortController·로컬 요청 ID로 race condition을 차단하고, 빈 결과·추천 실패 시 직접 주소 입력 fallback 문구를 표시한다.
 
 ### FE-032 제출·로딩·취소 흐름 연결

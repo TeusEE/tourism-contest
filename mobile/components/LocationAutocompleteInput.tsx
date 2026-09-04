@@ -28,44 +28,56 @@ export function LocationAutocompleteInput({
   onChangeText,
   onFocus,
   onBlur,
+  onSubmitEditing,
   ...inputProps
 }: LocationAutocompleteInputProps) {
   const [focused, setFocused] = useState(false);
   const [suggestions, setSuggestions] = useState<LocationSuggestion[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [requestFailed, setRequestFailed] = useState(false);
+  const [suggestionState, setSuggestionState] = useState<'idle' | 'loading' | 'empty' | 'error'>(
+    'idle',
+  );
   const requestId = useRef(0);
+  const selectedSuggestionValue = useRef<string | null>(null);
+  const activeController = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const query = value.trim();
     const currentRequestId = ++requestId.current;
     const controller = new AbortController();
 
-    if (!focused || !shouldSuggest(query)) {
+    if (!focused || !shouldSuggest(query) || selectedSuggestionValue.current === query) {
+      activeController.current?.abort();
+      activeController.current = null;
       return () => controller.abort();
     }
 
     const timer = setTimeout(() => {
-      setLoading(true);
-      setRequestFailed(false);
+      activeController.current?.abort();
+      activeController.current = controller;
+      setSuggestionState('loading');
       void requestLocationSuggestions(query, { signal: controller.signal })
         .then((items) => {
           if (requestId.current !== currentRequestId) return;
           setSuggestions(items);
+          setSuggestionState(items.length > 0 ? 'idle' : 'empty');
         })
         .catch((error: unknown) => {
           if (requestId.current !== currentRequestId) return;
           if (error instanceof ApiClientError && error.kind === 'cancelled') return;
           setSuggestions([]);
-          setRequestFailed(true);
+          setSuggestionState('error');
         })
         .finally(() => {
-          if (requestId.current === currentRequestId) setLoading(false);
+          if (activeController.current === controller) {
+            activeController.current = null;
+          }
         });
     }, 300);
 
     return () => {
       clearTimeout(timer);
+      activeController.current?.abort();
+      activeController.current = null;
       controller.abort();
     };
   }, [focused, value]);
@@ -73,16 +85,70 @@ export function LocationAutocompleteInput({
   const handleSelect = (suggestion: LocationSuggestion) => {
     const normalized = suggestion.roadAddress ?? suggestion.address ?? suggestion.name;
     onChangeText(normalized);
+    selectedSuggestionValue.current = normalized;
     setSuggestions([]);
+    setSuggestionState('idle');
     setFocused(false);
     Keyboard.dismiss();
   };
 
   const handleChangeText = (nextValue: string) => {
+    selectedSuggestionValue.current = null;
     onChangeText(nextValue);
     setSuggestions([]);
-    setRequestFailed(false);
-    if (!shouldSuggest(nextValue.trim())) setLoading(false);
+    setSuggestionState('idle');
+  };
+
+  const requestSuggestionsImmediately = () => {
+    const query = value.trim();
+    if (!focused || !shouldSuggest(query)) return;
+
+    const currentRequestId = ++requestId.current;
+    activeController.current?.abort();
+    const controller = new AbortController();
+    activeController.current = controller;
+    setSuggestions([]);
+    setSuggestionState('loading');
+
+    void requestLocationSuggestions(query, { signal: controller.signal })
+      .then((items) => {
+        if (requestId.current !== currentRequestId) return;
+        setSuggestions(items);
+        setSuggestionState(items.length > 0 ? 'idle' : 'empty');
+      })
+      .catch((error: unknown) => {
+        if (requestId.current !== currentRequestId) return;
+        if (error instanceof ApiClientError && error.kind === 'cancelled') return;
+        setSuggestions([]);
+        setSuggestionState('error');
+      })
+      .finally(() => {
+        if (activeController.current === controller) {
+          activeController.current = null;
+        }
+      });
+  };
+
+  const handleSubmitEditing: NonNullable<TextInputProps['onSubmitEditing']> = (event) => {
+    const query = value.trim();
+
+    if (suggestions.length > 0 || suggestionState === 'loading') {
+      // 후보를 먼저 확인하고 선택할 수 있도록 키보드 제출로 다음 필드로 이동하지 않는다.
+      return;
+    }
+
+    if (
+      suggestionState !== 'empty' &&
+      suggestionState !== 'error' &&
+      selectedSuggestionValue.current !== query &&
+      shouldSuggest(query)
+    ) {
+      // 디바운스가 아직 실행되지 않은 경우 Return 키를 후보 검색 버튼처럼 사용한다.
+      requestSuggestionsImmediately();
+      return;
+    }
+
+    onSubmitEditing?.(event);
   };
 
   return (
@@ -90,13 +156,14 @@ export function LocationAutocompleteInput({
       <AppTextInput
         {...inputProps}
         accessibilityLabel={inputProps.accessibilityLabel ?? label}
+        blurOnSubmit={false}
         error={error}
         label={label}
         onBlur={(event) => {
           onBlur?.(event);
           setTimeout(() => {
             setSuggestions([]);
-            setLoading(false);
+            setSuggestionState('idle');
             setFocused(false);
           }, 180);
         }}
@@ -105,17 +172,22 @@ export function LocationAutocompleteInput({
           onFocus?.(event);
           setFocused(true);
         }}
+        onSubmitEditing={handleSubmitEditing}
         value={value}
       />
 
-      {focused && loading ? (
+      {focused && suggestionState === 'loading' ? (
         <View accessibilityLiveRegion="polite" style={styles.statusRow}>
           <ActivityIndicator color={colors.primary} size="small" />
           <Text style={styles.statusText}>장소를 찾고 있어요.</Text>
         </View>
       ) : null}
 
-      {focused && !loading && suggestions.length > 0 ? (
+      {focused && suggestions.length > 0 ? (
+        <Text style={styles.statusText}>후보를 눌러 정확한 주소로 입력을 확정하세요.</Text>
+      ) : null}
+
+      {focused && suggestionState !== 'loading' && suggestions.length > 0 ? (
         <View accessibilityRole="list" style={styles.suggestionList}>
           {suggestions.map((suggestion, index) => {
             const address = suggestion.roadAddress ?? suggestion.address;
@@ -135,7 +207,11 @@ export function LocationAutocompleteInput({
         </View>
       ) : null}
 
-      {focused && !loading && requestFailed ? (
+      {focused && suggestionState === 'empty' ? (
+        <Text style={styles.statusText}>장소 후보가 없어요. 주소를 직접 입력해도 괜찮아요.</Text>
+      ) : null}
+
+      {focused && suggestionState === 'error' ? (
         <Text style={styles.statusText}>
           장소 추천을 사용할 수 없어요. 주소를 직접 입력해도 괜찮아요.
         </Text>
@@ -145,9 +221,8 @@ export function LocationAutocompleteInput({
 }
 
 function shouldSuggest(query: string): boolean {
-  // A digit usually indicates a complete road address. Avoid an extra local
-  // search request in that case; the analysis geocoder handles it directly.
-  return query.length >= 2 && query.length <= 80 && !/\d/.test(query);
+  // 도로명 주소도 사용자가 입력한 표현 그대로 후보를 확인할 수 있도록 검색한다.
+  return query.length >= 2 && query.length <= 80;
 }
 
 const styles = StyleSheet.create({

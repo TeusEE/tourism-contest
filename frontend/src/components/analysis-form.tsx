@@ -246,19 +246,32 @@ function LocationAutocompleteField({
     "idle" | "loading" | "empty" | "error"
   >("idle");
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [selectedSuggestionValue, setSelectedSuggestionValue] = useState<
+    string | null
+  >(null);
   const requestId = useRef(0);
+  const activeController = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const query = value.trim();
     const currentRequestId = ++requestId.current;
     const controller = new AbortController();
 
-    if (!focused || disabled || !shouldSuggest(query)) {
+    if (
+      !focused ||
+      disabled ||
+      !shouldSuggest(query) ||
+      selectedSuggestionValue === query
+    ) {
+      activeController.current?.abort();
+      activeController.current = null;
       return () => controller.abort();
     }
 
     const timer = window.setTimeout(() => {
       if (requestId.current !== currentRequestId) return;
+      activeController.current?.abort();
+      activeController.current = controller;
       setSuggestionState("loading");
       void requestLocationSuggestions(query, { signal: controller.signal })
         .then((items) => {
@@ -276,21 +289,67 @@ function LocationAutocompleteField({
           }
           setSuggestions([]);
           setSuggestionState("error");
+        })
+        .finally(() => {
+          if (activeController.current === controller) {
+            activeController.current = null;
+          }
         });
     }, 300);
 
     return () => {
       window.clearTimeout(timer);
+      activeController.current?.abort();
+      activeController.current = null;
       controller.abort();
     };
-  }, [disabled, focused, value]);
+  }, [disabled, focused, selectedSuggestionValue, value]);
 
   const selectSuggestion = (suggestion: LocationSuggestion) => {
-    onChange(suggestion.roadAddress ?? suggestion.address ?? suggestion.name);
+    const normalizedValue =
+      suggestion.roadAddress ?? suggestion.address ?? suggestion.name;
+    onChange(normalizedValue);
+    setSelectedSuggestionValue(normalizedValue);
     setSuggestions([]);
     setSuggestionState("idle");
     setActiveIndex(-1);
     setFocused(false);
+  };
+
+  const requestSuggestionsImmediately = () => {
+    const query = value.trim();
+    if (!focused || disabled || !shouldSuggest(query)) return;
+
+    const currentRequestId = ++requestId.current;
+    activeController.current?.abort();
+    const controller = new AbortController();
+    activeController.current = controller;
+    setSuggestions([]);
+    setSuggestionState("loading");
+    setActiveIndex(-1);
+
+    void requestLocationSuggestions(query, { signal: controller.signal })
+      .then((items) => {
+        if (requestId.current !== currentRequestId) return;
+        setSuggestions(items);
+        setSuggestionState(items.length > 0 ? "idle" : "empty");
+      })
+      .catch((error: unknown) => {
+        if (requestId.current !== currentRequestId) return;
+        if (
+          error instanceof ApiClientError &&
+          error.state.kind === "cancelled"
+        ) {
+          return;
+        }
+        setSuggestions([]);
+        setSuggestionState("error");
+      })
+      .finally(() => {
+        if (activeController.current === controller) {
+          activeController.current = null;
+        }
+      });
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -302,13 +361,34 @@ function LocationAutocompleteField({
       setActiveIndex((index) =>
         index <= 0 ? suggestions.length - 1 : index - 1,
       );
-    } else if (event.key === "Enter" && activeIndex >= 0) {
-      event.preventDefault();
-      selectSuggestion(suggestions[activeIndex]);
     } else if (event.key === "Escape") {
       setSuggestions([]);
       setSuggestionState("idle");
       setActiveIndex(-1);
+    } else if (event.key === "Enter") {
+      const query = value.trim();
+
+      if (suggestions.length > 0) {
+        // 첫 Enter는 첫 후보를 키보드로 가리키고, 두 번째 Enter 또는 클릭으로 후보를 확정한다.
+        event.preventDefault();
+        if (activeIndex >= 0) {
+          selectSuggestion(suggestions[activeIndex]);
+        } else {
+          setActiveIndex(0);
+        }
+      } else if (suggestionState === "loading") {
+        // 입력 직후 Enter를 눌러도 후보 요청이 끝나기 전에 폼이 제출되지 않도록 한다.
+        event.preventDefault();
+      } else if (
+        suggestionState !== "empty" &&
+        suggestionState !== "error" &&
+        selectedSuggestionValue !== query &&
+        shouldSuggest(query)
+      ) {
+        // 디바운스가 아직 실행되지 않은 경우 Enter를 후보 검색 버튼처럼 사용한다.
+        event.preventDefault();
+        requestSuggestionsImmediately();
+      }
     }
   };
 
@@ -343,6 +423,7 @@ function LocationAutocompleteField({
             }, 150);
           }}
           onChange={(event) => {
+            setSelectedSuggestionValue(null);
             onChange(event.target.value);
             setSuggestions([]);
             setSuggestionState("idle");
@@ -369,9 +450,15 @@ function LocationAutocompleteField({
         </span>
       ) : (
         <span className="field-hint" id={hintId}>
-          장소명 입력 시 후보를 보여드려요. 주소는 직접 입력할 수 있습니다.
+          장소명이나 도로명 주소를 입력한 뒤 Enter로 후보를 확인하고, 정확한
+          주소를 선택하세요.
         </span>
       )}
+      {focused && suggestions.length > 0 ? (
+        <span className="field-status" role="status">
+          후보를 클릭하거나 ↑↓ 후 Enter로 정확한 주소를 선택하세요.
+        </span>
+      ) : null}
       {focused && suggestionState === "empty" ? (
         <span className="field-status" role="status">
           장소 후보가 없어요. 주소를 직접 입력해도 괜찮아요.
@@ -414,5 +501,5 @@ function LocationAutocompleteField({
 }
 
 function shouldSuggest(query: string): boolean {
-  return query.length >= 2 && query.length <= 80 && !/\d/.test(query);
+  return query.length >= 2 && query.length <= 80;
 }

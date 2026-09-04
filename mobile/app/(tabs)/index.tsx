@@ -82,7 +82,7 @@ export default function AnalysisInputScreen() {
                 autoCorrect={false}
                 label="출발지"
                 placeholder="예: 서울역"
-                returnKeyType="next"
+                returnKeyType="search"
                 value={state.input.origin}
                 error={errors.origin}
                 onChangeText={(origin) => updateInput({ origin })}
@@ -92,7 +92,7 @@ export default function AnalysisInputScreen() {
                 autoCorrect={false}
                 label="여행지"
                 placeholder="예: 부산 해운대"
-                returnKeyType="next"
+                returnKeyType="search"
                 value={state.input.destination}
                 error={errors.destination}
                 onChangeText={(destination) => updateInput({ destination })}
