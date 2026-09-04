@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     mobile_app_name: str = "TravelCongestion"
 
     request_timeout_seconds: float = 60
+    request_connect_timeout_seconds: float = 10
     max_events_per_analysis: int = 100
     max_concurrent_upstream_requests: int = 10
     max_request_body_bytes: int = 65_536
@@ -48,6 +49,7 @@ class Settings(BaseSettings):
 
     @field_validator(
         "request_timeout_seconds",
+        "request_connect_timeout_seconds",
         "max_events_per_analysis",
         "max_concurrent_upstream_requests",
         "max_request_body_bytes",

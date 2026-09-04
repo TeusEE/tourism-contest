@@ -22,6 +22,7 @@ class StructuredFormatter(logging.Formatter):
             "duration_ms",
             "provider",
             "provider_status",
+            "timeout_type",
         ):
             value = getattr(record, field, None)
             if value is not None:

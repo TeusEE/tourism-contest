@@ -27,7 +27,10 @@ class AsyncJsonClient:
         self._owns_client = client is None
         timeout = httpx.Timeout(
             settings.request_timeout_seconds,
-            connect=min(settings.request_timeout_seconds, 10.0),
+            connect=min(
+                settings.request_timeout_seconds,
+                settings.request_connect_timeout_seconds,
+            ),
         )
         self._client = client or httpx.AsyncClient(timeout=timeout)
         self._semaphore = asyncio.Semaphore(settings.max_concurrent_upstream_requests)
@@ -52,7 +55,11 @@ class AsyncJsonClient:
             except httpx.TimeoutException as exc:
                 logger.warning(
                     "provider_request",
-                    extra={"provider": provider, "provider_status": "timeout"},
+                    extra={
+                        "provider": provider,
+                        "provider_status": "timeout",
+                        "timeout_type": type(exc).__name__,
+                    },
                 )
                 if attempt + 1 < attempts:
                     await asyncio.sleep(0.05 * (attempt + 1))

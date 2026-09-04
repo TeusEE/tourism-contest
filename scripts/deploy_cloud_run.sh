@@ -95,12 +95,12 @@ gcloud run deploy "${SERVICE_NAME}" \
   --cpu=1 \
   --memory=512Mi \
   --concurrency=10 \
-  --timeout=60s \
+  --timeout=120s \
   --min-instances=0 \
   --max-instances=1 \
   --allow-unauthenticated \
   --service-account="${RUNTIME_SERVICE_ACCOUNT}" \
-  --set-env-vars="APP_ENV=production,LOG_LEVEL=INFO,MOBILE_APP_NAME=TravelCongestion,REQUEST_TIMEOUT_SECONDS=60,MAX_EVENTS_PER_ANALYSIS=100,MAX_CONCURRENT_UPSTREAM_REQUESTS=10,MAX_REQUEST_BODY_BYTES=65536" \
+  --set-env-vars="APP_ENV=production,LOG_LEVEL=INFO,MOBILE_APP_NAME=TravelCongestion,REQUEST_TIMEOUT_SECONDS=120,REQUEST_CONNECT_TIMEOUT_SECONDS=30,MAX_EVENTS_PER_ANALYSIS=100,MAX_CONCURRENT_UPSTREAM_REQUESTS=10,MAX_REQUEST_BODY_BYTES=65536" \
   --set-secrets="DATA_GO_KR_SERVICE_KEY=travel-data-go-service-key:1,NCP_MAPS_CLIENT_ID=travel-ncp-maps-client-id:1,NCP_MAPS_CLIENT_SECRET=travel-ncp-maps-client-secret:1,NCP_LOCAL_SEARCH_CLIENT_ID=travel-ncp-local-search-client-id:1,NCP_LOCAL_SEARCH_CLIENT_SECRET=travel-ncp-local-search-client-secret:1" \
   --quiet
 
