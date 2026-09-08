@@ -342,6 +342,12 @@ h2 {
     box-shadow 160ms ease;
 }
 
+.form-field input[type="date"],
+.form-field input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 .form-field input::placeholder {
   color: var(--subtle);
 }
